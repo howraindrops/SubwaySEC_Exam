@@ -5,9 +5,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import huawei.biz.CardManager;
 import huawei.biz.SubwayManager;
+import huawei.exam.CardEnum;
+import huawei.exam.ReturnCodeEnum;
 import huawei.exam.SubwayException;
 import huawei.model.Card;
+import huawei.model.ConsumeRecord;
 import huawei.model.Subways;
+import huawei.model.Subways.DistanceInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +37,7 @@ public class SubwayManagerImpl implements SubwayManager
 
     private Subways subways = new Subways();
     private CardManager cardManager;
+    
     public SubwayManagerImpl(CardManager cardManager)
     {
         this.cardManager = cardManager;
@@ -52,10 +58,43 @@ public class SubwayManagerImpl implements SubwayManager
     public Card takeSubway(String cardId, String enterStation, String enterTime, String exitStation, String exitTime)
         throws SubwayException
     {
-        //TODO 待考生实现
+    	Card card = cardManager.queryCard(cardId);
+    	Table<String, String, DistanceInfo> table = subways.getStationDistances();
+    	boolean isStationValid = table.containsRow(enterStation)&&table.containsRow(exitStation);
+    	if(!isStationValid) 
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E07,null);
+    	}
+    	
+    	int price = 0;
+    	if(enterStation.equals(exitStation))
+    	{
+    		if(getTimePeriod(enterTime,exitTime,card)>30) price = 3;
+    	}else
+    	{
+    		price = calculateBasicPrice(enterStation,exitStation,table);
+    	}
+    	if(card.getCardType() == CardEnum.A)
+    	{
+    		price = price>card.getMoney()?price:card.getMoney();
+    	}else if(card.getCardType() == CardEnum.B && isDiscountValid(enterTime))
+    	{
+    		price = (int)Math.floor(price*0.8);
+    	}
+    	cardManager.consume(cardId, price);
+    	
+    	ConsumeRecord cr = new ConsumeRecord();
+    	cr.setEnterStation(enterStation);
+    	cr.setEnterTime(enterTime);
+    	cr.setExitStation(exitStation);
+    	cr.setExitTime(exitTime);
+    	cr.setConsumeMoney(price);
+    	List<ConsumeRecord> crList = cardManager.queryConsumeRecord(cardId);
+    	crList.add(cr);
+    	
         return null;
     }
-
+    
     @Override
     public void manageSubways()
     {
@@ -173,5 +212,58 @@ public class SubwayManagerImpl implements SubwayManager
         distanceTable.put("S37", "S36", new Subways.DistanceInfo("3", 1555));
         distanceTable.put("S38", "S37", new Subways.DistanceInfo("3", 1682));
         return distanceTable;
+    }
+    
+    private int getTimePeriod(String enterTime, String exitTime, Card card)
+    	throws SubwayException
+    {
+    	String[] enter = enterTime.split(":");
+    	String[] exit = exitTime.split(":");
+    	int enHour = Integer.valueOf(enter[0]);
+    	int enMin = Integer.valueOf(enter[1]);
+    	int exHour = Integer.valueOf(exit[0]);
+    	int exMin = Integer.valueOf(exit[0]);
+    	boolean isEnterLater = (enHour>exHour)||((enHour==exHour)&&(enMin>exMin));
+    	if(isEnterLater)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E05, card);
+    	}
+    	return 0;
+    }
+    
+    private int calculateBasicPrice(String enterStation, String exitStation, Table<String, String, DistanceInfo> table)
+    	throws SubwayException
+    {
+    	//TODO Dijkstra算法求最短路径,路径非法时抛exception
+    	if(!table.contains(enterStation, exitStation)) return 0;
+    	
+    	int path = table.get(enterStation, exitStation).getDistance();
+    	int price = 0;
+    	if(path<=3000 && path>0)
+    	{
+    		price = 2;
+    	}else if(path<=5000)
+    	{
+    		price = 3;
+    	}else if(path<=10000)
+    	{
+    		price = 4;
+    	}else
+    	{
+    		price = 5;
+    	}
+    	return price;
+    }
+    
+    private boolean isDiscountValid(String enterTime)
+    {
+    	String[] enter = enterTime.split(":");
+    	int enHour = Integer.valueOf(enter[0]);
+    	int enMin = Integer.valueOf(enter[1]);
+    	if((enHour>=10&&enHour<15)||(enHour==15&&enMin==0))
+    	{
+    		return true;
+    	}
+    	return false;
     }
 }

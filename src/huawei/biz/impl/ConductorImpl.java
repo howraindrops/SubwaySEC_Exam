@@ -31,7 +31,6 @@ public class ConductorImpl implements Conductor
     public Card buyCard(String enterStation, String exitStation)
         throws SubwayException
     {
-        //TODO 待考生实现
         return cardManager.buyCard(enterStation, exitStation);
     }
 
@@ -39,7 +38,6 @@ public class ConductorImpl implements Conductor
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
     {
-        //TODO 待考生实现
         return cardManager.buyCard(cardEnum, money);
     }
 
@@ -47,15 +45,13 @@ public class ConductorImpl implements Conductor
     public Card recharge(String cardId, int money)
         throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+        return cardManager.recharge(cardId, money);
     }
 
     @Override
     public Card deleteCard(String cardId)
         throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+        return cardManager.deleteCard(cardId);
     }
 }

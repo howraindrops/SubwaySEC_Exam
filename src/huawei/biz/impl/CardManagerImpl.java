@@ -1,12 +1,14 @@
 package huawei.biz.impl;
 
 import huawei.biz.CardManager;
+import huawei.biz.SubwayManager;
 import huawei.exam.CardEnum;
 import huawei.exam.ReturnCodeEnum;
 import huawei.exam.SubwayException;
 import huawei.model.Card;
 import huawei.model.ConsumeRecord;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,34 +26,31 @@ import java.util.List;
 public class CardManagerImpl implements CardManager
 {
 	private Card[] cardArray = new Card[100];
+	private List<ConsumeRecord>[] consumeRecords = new ArrayList[100];
 	
     @Override
     public Card buyCard(String enterStation, String exitStation)
         throws SubwayException
     {
-        //TODO 待考生实现
     	Card card = new Card();
     	card.setCardType(CardEnum.A);
-    	
-        return null;
+    	String cardId = getNextCardId();
+    	card.setCardId(cardId);
+    	card.setMoney(0);
+    	cardArray[Integer.valueOf(cardId)] = card;
+        return card;
     }
 
     @Override
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
     {
-        //TODO 待考生实现
     	Card card = new Card();
     	card.setCardType(cardEnum);
     	card.setMoney(money);
     	String cardId = getNextCardId();
-    	if(cardId.equals("false"))
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E08,card);
-    	}else
-    	{
-    		card.setCardId(cardId);
-    	}
+    	card.setCardId(cardId);
+    	cardArray[Integer.valueOf(cardId)] = card;
     	
         return card;
     }
@@ -60,42 +59,65 @@ public class CardManagerImpl implements CardManager
     public Card recharge(String cardId, int money)
         throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+    	int id = Integer.valueOf(cardId);
+    	isCardIdValid(id);
+    	Card card = cardArray[id];
+    	card.setMoney(money+card.getMoney());
+        return card;
     }
 
     @Override
     public Card queryCard(String cardId) throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+    	int id = Integer.valueOf(cardId);
+    	isCardIdValid(id);
+    	Card card = cardArray[id];
+        return card;
     }
 
     @Override
     public Card deleteCard(String cardId)
         throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+    	int id = Integer.valueOf(cardId);
+    	isCardIdValid(id);
+    	Card card = cardArray[id];
+    	cardArray[id] = null;
+        return card;
     }
 
     @Override
     public Card consume(String cardId, int billing)
         throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+    	int id = Integer.valueOf(cardId);
+    	isCardIdValid(id);
+    	Card card = cardArray[id];
+    	int money = card.getMoney();
+    	if(billing>money)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E02,card);
+    	}
+    	card.setMoney(money-billing);
+    	if(card.getMoney()<20)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E03,card);
+    	}
+    	
+        return card;
     }
 
     @Override
     public List<ConsumeRecord> queryConsumeRecord(String cardId)
         throws SubwayException
     {
-        //TODO 待考生实现
-        return null;
+    	int id = Integer.valueOf(cardId);
+    	isCardIdValid(id);
+        return consumeRecords[id];
     }
     
-    private String getNextCardId()
+    private String getNextCardId() 
+    	throws SubwayException
     {
     	boolean findValidId = false;
     	String cardId = null;
@@ -111,8 +133,18 @@ public class CardManagerImpl implements CardManager
     	
     	if(!findValidId)
     	{
-    		cardId = "false";
+    		throw new SubwayException(ReturnCodeEnum.E08,null);
     	}
     	return cardId;
     }
+    
+    private boolean isCardIdValid(int id)
+    	throws SubwayException
+	{
+    	if(cardArray[id] == null)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E06,null);
+    	}
+    	return true;
+	}
 }
