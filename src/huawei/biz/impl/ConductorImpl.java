@@ -32,7 +32,7 @@ public class ConductorImpl implements Conductor
         throws SubwayException
     {
         //TODO 待考生实现
-        return null;
+        return cardManager.buyCard(enterStation, exitStation);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ConductorImpl implements Conductor
         throws SubwayException
     {
         //TODO 待考生实现
-        return null;
+        return cardManager.buyCard(cardEnum, money);
     }
 
     @Override

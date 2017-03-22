@@ -40,7 +40,7 @@ public class PassengerImpl implements Passenger
         throws SubwayException
     {
         //TODO 待考生实现
-        return null;
+        return conductor.buyCard(enterStation, exitStation);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class PassengerImpl implements Passenger
         throws SubwayException
     {
         //TODO 待考生实现
-        return null;
+    	return conductor.buyCard(cardEnum, money);
     }
 
     @Override

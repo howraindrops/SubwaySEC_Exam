@@ -2,9 +2,11 @@ package huawei.biz.impl;
 
 import huawei.biz.CardManager;
 import huawei.exam.CardEnum;
+import huawei.exam.ReturnCodeEnum;
 import huawei.exam.SubwayException;
 import huawei.model.Card;
 import huawei.model.ConsumeRecord;
+
 import java.util.List;
 
 /**
@@ -21,11 +23,16 @@ import java.util.List;
  */
 public class CardManagerImpl implements CardManager
 {
+	private Card[] cardArray = new Card[100];
+	
     @Override
     public Card buyCard(String enterStation, String exitStation)
         throws SubwayException
     {
         //TODO 待考生实现
+    	Card card = new Card();
+    	card.setCardType(CardEnum.A);
+    	
         return null;
     }
 
@@ -34,7 +41,19 @@ public class CardManagerImpl implements CardManager
         throws SubwayException
     {
         //TODO 待考生实现
-        return null;
+    	Card card = new Card();
+    	card.setCardType(cardEnum);
+    	card.setMoney(money);
+    	String cardId = getNextCardId();
+    	if(cardId.equals("false"))
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E08,card);
+    	}else
+    	{
+    		card.setCardId(cardId);
+    	}
+    	
+        return card;
     }
 
     @Override
@@ -74,5 +93,26 @@ public class CardManagerImpl implements CardManager
     {
         //TODO 待考生实现
         return null;
+    }
+    
+    private String getNextCardId()
+    {
+    	boolean findValidId = false;
+    	String cardId = null;
+    	for(int i=0; i<100; i++)
+    	{
+    		if(cardArray[i]==null)
+    		{
+    			cardId = String.valueOf(i);
+    			findValidId = true;
+    			break;
+    		}
+    	}
+    	
+    	if(!findValidId)
+    	{
+    		cardId = "false";
+    	}
+    	return cardId;
     }
 }
