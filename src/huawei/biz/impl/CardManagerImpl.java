@@ -1,7 +1,6 @@
 package huawei.biz.impl;
 
 import huawei.biz.CardManager;
-import huawei.biz.SubwayManager;
 import huawei.exam.CardEnum;
 import huawei.exam.ReturnCodeEnum;
 import huawei.exam.SubwayException;

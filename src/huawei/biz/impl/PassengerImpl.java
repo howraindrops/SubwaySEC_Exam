@@ -104,26 +104,31 @@ public class PassengerImpl implements Passenger
     
     private int calculateBasicPrice(String enterStation, String exitStation, Table<String, String, DistanceInfo> table)
         	throws SubwayException
-        {
-        	//TODO Dijkstra算法求最短路径,路径非法时抛exception
-        	return 5;
-        	
-//        	int path = table.get(enterStation, exitStation).getDistance();
-//        	int price = 0;
-//        	if(path<=3000 && path>0)
-//        	{
-//        		price = 2;
-//        	}else if(path<=5000)
-//        	{
-//        		price = 3;
-//        	}else if(path<=10000)
-//        	{
-//        		price = 4;
-//        	}else
-//        	{
-//        		price = 5;
-//        	}
-//        	return price;
-        }
+    {
+    	//TODO Dijkstra算法求最短路径,路径非法时抛exception
+    	if(enterStation.equals(exitStation))
+    	{
+    		return 0;
+    	}
+    	
+    	return 5;
+    	
+//    	int path = table.get(enterStation, exitStation).getDistance();
+//    	int price = 0;
+//    	if(path<=3000 && path>0)
+//    	{
+//    		price = 2;
+//    	}else if(path<=5000)
+//    	{
+//    		price = 3;
+//    	}else if(path<=10000)
+//    	{
+//    		price = 4;
+//    	}else
+//    	{
+//    		price = 5;
+//    	}
+//    	return price;
+    }
 
 }
