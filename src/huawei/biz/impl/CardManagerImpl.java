@@ -9,7 +9,9 @@ import huawei.model.Card;
 import huawei.model.ConsumeRecord;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Title: 待考生实现类</p>
@@ -25,8 +27,11 @@ import java.util.List;
  */
 public class CardManagerImpl implements CardManager
 {
-	private Card[] cardArray = new Card[100];
-	private List<ConsumeRecord>[] consumeRecords = new ArrayList[100];
+//	private Card[] cardArray = new Card[100];
+//	public List<ConsumeRecord>[] consumeRecords = new ArrayList[100];
+	
+	private Map<String, Card> cardMap = new HashMap<String, Card>();
+	public Map<String,List<ConsumeRecord>> consumeRecords = new HashMap<String,List<ConsumeRecord>>();
 	
     @Override
     public Card buyCard(String enterStation, String exitStation)
@@ -37,21 +42,24 @@ public class CardManagerImpl implements CardManager
     	String cardId = getNextCardId();
     	card.setCardId(cardId);
     	card.setMoney(0);
-    	cardArray[Integer.valueOf(cardId)] = card;
+    	cardMap.put(cardId, card);
         return card;
     }
 
     @Override
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
-    {
+    {	
+    	if(cardEnum!=CardEnum.A&&cardEnum!=CardEnum.B&&cardEnum!=CardEnum.C)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E04, new Card());
+    	}
     	Card card = new Card();
     	card.setCardType(cardEnum);
     	card.setMoney(money);
     	String cardId = getNextCardId();
     	card.setCardId(cardId);
-    	cardArray[Integer.valueOf(cardId)] = card;
-    	
+    	cardMap.put(cardId, card);
         return card;
     }
 
@@ -59,40 +67,33 @@ public class CardManagerImpl implements CardManager
     public Card recharge(String cardId, int money)
         throws SubwayException
     {
-    	int id = Integer.valueOf(cardId);
-    	isCardIdValid(id);
-    	Card card = cardArray[id];
+    	Card card = getCardIdValid(cardId);
     	card.setMoney(money+card.getMoney());
-        return card;
+    	return card;
     }
 
     @Override
     public Card queryCard(String cardId) throws SubwayException
     {
-    	int id = Integer.valueOf(cardId);
-    	isCardIdValid(id);
-    	Card card = cardArray[id];
-        return card;
+    	Card card = getCardIdValid(cardId);
+    	return card;
     }
 
     @Override
     public Card deleteCard(String cardId)
         throws SubwayException
     {
-    	int id = Integer.valueOf(cardId);
-    	isCardIdValid(id);
-    	Card card = cardArray[id];
-    	cardArray[id] = null;
-        return card;
+    	Card card = getCardIdValid(cardId);
+    	cardMap.remove(cardId);
+		return card;
     }
 
     @Override
     public Card consume(String cardId, int billing)
         throws SubwayException
     {
-    	int id = Integer.valueOf(cardId);
-    	isCardIdValid(id);
-    	Card card = cardArray[id];
+    	Card card = getCardIdValid(cardId);
+    	
     	int money = card.getMoney();
     	if(billing>money)
     	{
@@ -103,17 +104,24 @@ public class CardManagerImpl implements CardManager
     	{
     		throw new SubwayException(ReturnCodeEnum.E03,card);
     	}
-    	
-        return card;
+		return card;
     }
 
     @Override
     public List<ConsumeRecord> queryConsumeRecord(String cardId)
         throws SubwayException
     {
-    	int id = Integer.valueOf(cardId);
-    	isCardIdValid(id);
-        return consumeRecords[id];
+    	getCardIdValid(cardId);
+    	List<ConsumeRecord> crList;
+    	if(consumeRecords.containsKey(cardId))
+    	{
+    		crList = consumeRecords.get(cardId);
+    	}else
+    	{
+    		crList = new ArrayList<ConsumeRecord>();
+    		consumeRecords.put(cardId, crList);
+    	}
+        return crList;
     }
     
     private String getNextCardId() 
@@ -123,9 +131,10 @@ public class CardManagerImpl implements CardManager
     	String cardId = null;
     	for(int i=0; i<100; i++)
     	{
-    		if(cardArray[i]==null)
+    		String id = String.valueOf(i);
+    		if(!cardMap.containsKey(id))
     		{
-    			cardId = String.valueOf(i);
+    			cardId = id;
     			findValidId = true;
     			break;
     		}
@@ -133,18 +142,25 @@ public class CardManagerImpl implements CardManager
     	
     	if(!findValidId)
     	{
-    		throw new SubwayException(ReturnCodeEnum.E08,null);
+    		throw new SubwayException(ReturnCodeEnum.E08,new Card());
     	}
     	return cardId;
     }
     
-    private boolean isCardIdValid(int id)
+    private Card getCardIdValid(String id)
     	throws SubwayException
 	{
-    	if(cardArray[id] == null)
+    	Card card = new Card();
+    	if(cardMap.containsKey(id))
     	{
-    		throw new SubwayException(ReturnCodeEnum.E06,null);
+    		card = cardMap.get(id);
+    	}else
+    	{
+    		card = new Card();
+    		card.setCardId(id);
+    		card.setCardType(CardEnum.E);
+    		throw new SubwayException(ReturnCodeEnum.E06, card);
     	}
-    	return true;
+    	return card;
 	}
 }

@@ -49,7 +49,10 @@ public class PassengerImpl implements Passenger
     	Subways subways = subwayManager.querySubways();
     	Table<String, String, DistanceInfo> table = subways.getStationDistances();
     	boolean isStationValid = table.containsRow(enterStation)&&table.containsRow(exitStation);
-    	if(!isStationValid) throw new SubwayException(ReturnCodeEnum.E07,null);
+    	if(!isStationValid) 
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E07,new Card());
+    	}
     	
     	int price = calculateBasicPrice(enterStation, exitStation, table);
     	
@@ -58,33 +61,6 @@ public class PassengerImpl implements Passenger
         return card;
     }
     
-    private int calculateBasicPrice(String enterStation, String exitStation, Table<String, String, DistanceInfo> table)
-    	throws SubwayException
-    {
-    	//TODO Dijkstra算法求最短路径,路径非法时抛exception
-    	if(!table.contains(enterStation, exitStation))
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E01,null);
-    	}
-    	
-    	int path = table.get(enterStation, exitStation).getDistance();
-    	int price = 0;
-    	if(path<=3000 && path>0)
-    	{
-    		price = 2;
-    	}else if(path<=5000)
-    	{
-    		price = 3;
-    	}else if(path<=10000)
-    	{
-    		price = 4;
-    	}else
-    	{
-    		price = 5;
-    	}
-    	return price;
-    }
-
     @Override
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
@@ -125,4 +101,29 @@ public class PassengerImpl implements Passenger
     {
         return cardManager.queryConsumeRecord(cardId);
     }
+    
+    private int calculateBasicPrice(String enterStation, String exitStation, Table<String, String, DistanceInfo> table)
+        	throws SubwayException
+        {
+        	//TODO Dijkstra算法求最短路径,路径非法时抛exception
+        	return 5;
+        	
+//        	int path = table.get(enterStation, exitStation).getDistance();
+//        	int price = 0;
+//        	if(path<=3000 && path>0)
+//        	{
+//        		price = 2;
+//        	}else if(path<=5000)
+//        	{
+//        		price = 3;
+//        	}else if(path<=10000)
+//        	{
+//        		price = 4;
+//        	}else
+//        	{
+//        		price = 5;
+//        	}
+//        	return price;
+        }
+
 }

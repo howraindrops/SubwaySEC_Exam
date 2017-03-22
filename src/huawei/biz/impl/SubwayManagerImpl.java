@@ -66,14 +66,17 @@ public class SubwayManagerImpl implements SubwayManager
     		throw new SubwayException(ReturnCodeEnum.E07,null);
     	}
     	
-    	int price = 0;
-    	if(enterStation.equals(exitStation))
+    	//计算票价
+    	int price;
+    	int time = getTimePeriod(enterTime,exitTime,card);
+    	if(enterStation.equals(exitStation)&&time>30)
     	{
-    		if(getTimePeriod(enterTime,exitTime,card)>30) price = 3;
+    		price = 3;
     	}else
     	{
     		price = calculateBasicPrice(enterStation,exitStation,table);
     	}
+    
     	if(card.getCardType() == CardEnum.A)
     	{
     		price = price>card.getMoney()?price:card.getMoney();
@@ -81,18 +84,23 @@ public class SubwayManagerImpl implements SubwayManager
     	{
     		price = (int)Math.floor(price*0.8);
     	}
+    	//扣费并保存消费记录，回收单程卡
     	cardManager.consume(cardId, price);
-    	
-    	ConsumeRecord cr = new ConsumeRecord();
-    	cr.setEnterStation(enterStation);
-    	cr.setEnterTime(enterTime);
-    	cr.setExitStation(exitStation);
-    	cr.setExitTime(exitTime);
-    	cr.setConsumeMoney(price);
-    	List<ConsumeRecord> crList = cardManager.queryConsumeRecord(cardId);
-    	crList.add(cr);
-    	
-        return null;
+    	if(card.getCardType() == CardEnum.A)
+    	{
+    		cardManager.deleteCard(cardId);
+    	}else
+    	{
+    		ConsumeRecord cr = new ConsumeRecord();
+	    	cr.setEnterStation(enterStation);
+	    	cr.setEnterTime(enterTime);
+	    	cr.setExitStation(exitStation);
+	    	cr.setExitTime(exitTime);
+	    	cr.setConsumeMoney(price);
+	    	List<ConsumeRecord> crList = cardManager.queryConsumeRecord(cardId);
+	    	crList.add(cr);
+    	}
+        return card;
     }
     
     @Override
@@ -224,35 +232,41 @@ public class SubwayManagerImpl implements SubwayManager
     	int exHour = Integer.valueOf(exit[0]);
     	int exMin = Integer.valueOf(exit[0]);
     	boolean isEnterLater = (enHour>exHour)||((enHour==exHour)&&(enMin>exMin));
-    	if(isEnterLater)
+    	boolean isTimeFormatValid = enHour<24&&exHour<24&&enMin<60&&exMin<60;
+    	if(isEnterLater||(!isTimeFormatValid))
     	{
     		throw new SubwayException(ReturnCodeEnum.E05, card);
     	}
-    	return 0;
+    	
+    	int time = (exHour*60 + exMin) - (enHour*60 + enMin);
+    	return time;
     }
     
     private int calculateBasicPrice(String enterStation, String exitStation, Table<String, String, DistanceInfo> table)
     	throws SubwayException
     {
     	//TODO Dijkstra算法求最短路径,路径非法时抛exception
-    	if(!table.contains(enterStation, exitStation)) return 0;
-    	
-    	int path = table.get(enterStation, exitStation).getDistance();
-    	int price = 0;
-    	if(path<=3000 && path>0)
+    	if(enterStation.equals(exitStation))
     	{
-    		price = 2;
-    	}else if(path<=5000)
-    	{
-    		price = 3;
-    	}else if(path<=10000)
-    	{
-    		price = 4;
-    	}else
-    	{
-    		price = 5;
+    		return 0;
     	}
-    	return price;
+    	return 5;
+//    	int path = table.get(enterStation, exitStation).getDistance();
+//    	int price = 0;
+//    	if(path<=3000 && path>0)
+//    	{
+//    		price = 2;
+//    	}else if(path<=5000)
+//    	{
+//    		price = 3;
+//    	}else if(path<=10000)
+//    	{
+//    		price = 4;
+//    	}else
+//    	{
+//    		price = 5;
+//    	}
+//    	return price;
     }
     
     private boolean isDiscountValid(String enterTime)
