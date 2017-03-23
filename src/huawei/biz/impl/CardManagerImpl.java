@@ -27,7 +27,7 @@ import java.util.Map;
 public class CardManagerImpl implements CardManager
 {	
 	private Map<String, Card> cardMap = new HashMap<String, Card>();
-	private Map<String,List<ConsumeRecord>> consumeRecords = new HashMap<String,List<ConsumeRecord>>();
+	private Map<String,List<ConsumeRecord>> cardRecords = new HashMap<String,List<ConsumeRecord>>();
 	private final int MAX_CARD_NUMBER = 100;
 	
     @Override
@@ -47,10 +47,6 @@ public class CardManagerImpl implements CardManager
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
     {	
-    	if(cardEnum!=CardEnum.A&&cardEnum!=CardEnum.B&&cardEnum!=CardEnum.C)
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E04, new Card());
-    	}
     	Card card = new Card();
     	card.setCardType(cardEnum);
     	card.setMoney(money);
@@ -73,18 +69,16 @@ public class CardManagerImpl implements CardManager
     public Card queryCard(String cardId) 
     	throws SubwayException
     {
-    	Card card = new Card();
     	if(cardMap.containsKey(cardId))
     	{
-    		card = cardMap.get(cardId);
+    		return cardMap.get(cardId);
     	}else
     	{
-    		card = new Card();
+    		Card card = new Card();
     		card.setCardId(cardId);
     		card.setCardType(CardEnum.E);
     		throw new SubwayException(ReturnCodeEnum.E06, card);
     	}
-    	return card;
     }
 
     @Override
@@ -93,9 +87,9 @@ public class CardManagerImpl implements CardManager
     {
     	Card card = queryCard(cardId);
     	cardMap.remove(cardId);
-    	if(consumeRecords.containsKey(cardId))
+    	if(cardRecords.containsKey(cardId))
     	{
-    		consumeRecords.remove(cardId);
+    		cardRecords.remove(cardId);
     	}
 		return card;
     }
@@ -105,16 +99,13 @@ public class CardManagerImpl implements CardManager
         throws SubwayException
     {
     	Card card = queryCard(cardId);
-    	
     	int money = card.getMoney();
     	if(billing>money)
     	{
     		throw new SubwayException(ReturnCodeEnum.E02,card);
-    	}
-    	card.setMoney(money-billing);
-    	if(card.getMoney()<20 && card.getCardType()!=CardEnum.A)
+    	}else
     	{
-    		throw new SubwayException(ReturnCodeEnum.E03,card);
+    		card.setMoney(money-billing);
     	}
 		return card;
     }
@@ -125,17 +116,22 @@ public class CardManagerImpl implements CardManager
     {
     	queryCard(cardId);
     	List<ConsumeRecord> crList;
-    	if(consumeRecords.containsKey(cardId))
+    	if(cardRecords.containsKey(cardId))
     	{
-    		crList = consumeRecords.get(cardId);
+    		crList = cardRecords.get(cardId);
     	}else
     	{
     		crList = new ArrayList<ConsumeRecord>();
-    		consumeRecords.put(cardId, crList);
+    		cardRecords.put(cardId, crList);
     	}
         return crList;
     }
     
+    /**
+     * 获取一个合法cardId，若card数量超限会抛异常
+     * @return
+     * @throws SubwayException
+     */
     private String getNextCardId() 
     	throws SubwayException
     {
@@ -144,17 +140,14 @@ public class CardManagerImpl implements CardManager
     		throw new SubwayException(ReturnCodeEnum.E08,new Card());
     	}
     	
-    	String cardId = null;
     	for(int i=0; i<MAX_CARD_NUMBER; i++)
     	{
     		String id = String.valueOf(i);
     		if(!cardMap.containsKey(id))
     		{
-    			cardId = id;
-    			break;
+    			return id;
     		}
     	}
-    	
-    	return cardId;
+    	return null;
     }
 }

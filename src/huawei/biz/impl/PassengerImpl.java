@@ -5,15 +5,11 @@ import huawei.biz.Conductor;
 import huawei.biz.Passenger;
 import huawei.biz.SubwayManager;
 import huawei.exam.CardEnum;
-import huawei.exam.ReturnCodeEnum;
 import huawei.exam.SubwayException;
 import huawei.model.Card;
 import huawei.model.ConsumeRecord;
 import huawei.model.Subways;
-import huawei.model.Subways.DistanceInfo;
-
 import java.util.List;
-import com.google.common.collect.Table;
 
 /**
  * <p>Title: 待考生实现类</p>
@@ -44,17 +40,10 @@ public class PassengerImpl implements Passenger
     public Card buyCard(String enterStation, String exitStation)
         throws SubwayException
     {
-    	//判断地铁站是否合法
     	Subways subways = subwayManager.querySubways();
-    	Table<String, String, DistanceInfo> table = subways.getStationDistances();
-    	boolean isStationValid = table.containsRow(enterStation)&&table.containsRow(exitStation);
-    	if(!isStationValid) 
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E07,new Card());
-    	}
-    	//寻找最短路径并判断路径是否合法
-    	int price = SubwayManagerImpl.calculateBasicPrice(enterStation, exitStation, subways);
-    	
+    	//计算按两个站点之间最短距离计算基本票价，若没有路线会抛异常
+    	int price = PriceCalculator.getBasicPrice(enterStation, exitStation, subways);
+    	//出入车站是合法的，开始办单程票
     	Card card = conductor.buyCard(enterStation, exitStation);
     	card = recharge(card.getCardId(), price);
         return card;
