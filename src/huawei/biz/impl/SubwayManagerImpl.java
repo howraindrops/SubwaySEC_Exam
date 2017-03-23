@@ -12,11 +12,8 @@ import huawei.model.Card;
 import huawei.model.ConsumeRecord;
 import huawei.model.Subways;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * <p>Title: 待考生实现类takeSubway乘车函数，其它已实现功能函数不用关注</p>
@@ -60,11 +57,10 @@ public class SubwayManagerImpl implements SubwayManager
         throws SubwayException
     {
     	Card card = cardManager.queryCard(cardId);
-    	
     	//计算扣费票价
     	int price = PriceCalculator.getChargePrice(card, enterStation, enterTime, exitStation, exitTime, subways);
     
-    	//扣费
+    	//执行扣费
     	cardManager.consume(cardId, price);
     	if(card.getCardType() == CardEnum.A)
     	{
@@ -207,94 +203,5 @@ public class SubwayManagerImpl implements SubwayManager
         distanceTable.put("S38", "S37", new Subways.DistanceInfo("3", 1682));
         return distanceTable;
     }
-    
-    /**
-     * Dijkstra算法求取两站点之间的最短距离
-     * @param subways
-     * @param enterStation 起始站点
-     * @param exitStation 终止站点
-     * @return 最短距离；如果输入enterStation和exitStation有误，则会报出异常
-     *
-     * @author lj95801
-     */
-    public static int dijkstraMiniDistance_quick(Subways subways,String enterStation, String exitStation)
-    	throws SubwayException
-    {
-        class Node {
-           Node(String name, int dist){
-                this.name = name;
-                this.dist = dist;
-            }
-            private String name;
-            private int dist;
-
-            @Override
-            public String toString() {
-                return "Node{" +
-                        "name='" + name + '\'' +
-                        ", dist=" + dist +
-                        '}';
-            }
-        }
-
-        //依据命令中站点是否不要区分大小写
-        String enterSta = enterStation.toUpperCase();
-        String exitSta = exitStation.toUpperCase();
-
-        if(subways == null || subways.getStationDistances().size() <= 0){
-            //无效的线路
-            throw new SubwayException(ReturnCodeEnum.E01, null);
-        }
-
-        //所有地铁站点名称集合
-        Set<String> V = subways.getStationDistances().columnKeySet();
-        if(!V.contains(enterSta) || !V.contains(exitSta)){
-            //无效的地铁站
-            throw new SubwayException(ReturnCodeEnum.E07, null);
-        }
-
-        Table<String, String, Subways.DistanceInfo> table = subways.getStationDistances();
-        LinkedList<Node> list = new LinkedList<>();
-        for (String s : V) {
-            Node nd = new Node(s, Integer.MAX_VALUE);
-            if(nd.name.equals(enterSta)){
-                nd.dist = 0;
-            }
-            list.add(nd);
-        }
-
-        //逻辑上能够保证函数出口时不为null，此处赋一个无效值是为了通过findbugs测试
-        Node exitNode = new Node("#", -1);
-        int total = V.size();
-        for (int i = 0; i < total; i++) {
-            //lambda表达式jdk8
-//            list.sort((o1, o2) -> o1.dist - o2.dist);
-            list.sort(new Comparator<Node>() {
-                @Override
-                public int compare(Node o1, Node o2) {
-                    return o1.dist - o2.dist;
-                }
-            });
-            Node uu = list.poll();
-            if(uu.name.equals(exitSta)){
-                exitNode = uu;
-                //找到出站点，可以提前结束查找
-                break;
-            }
-
-            Set<String> u = table.column(uu.name).keySet();
-            for (Node uNode : list) {
-                if(!u.contains(uNode.name)){
-                    continue;
-                }
-                if(uu.dist + table.get(uu.name, uNode.name).getDistance() < uNode.dist){
-                    uNode.dist = uu.dist + table.get(uu.name, uNode.name).getDistance();
-                }
-            }
-        }
-
-        return exitNode.dist;
-    }
-    
     
 }

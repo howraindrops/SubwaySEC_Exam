@@ -1,5 +1,10 @@
 package huawei.biz.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.Table;
 
 import huawei.exam.CardEnum;
@@ -16,7 +21,7 @@ public class PriceCalculator
 	 * @param enterStation
 	 * @param exitStation
 	 * @param subways
-	 * @return
+	 * @return 基本票价（元）
 	 * @throws SubwayException
 	 */
 	public static int getBasicPrice(String enterStation, String exitStation, Subways subways)
@@ -55,7 +60,7 @@ public class PriceCalculator
 	 * @param exitStation
 	 * @param exitTime
 	 * @param subways
-	 * @return
+	 * @return 扣费票价（元）
 	 * @throws SubwayException
 	 */
 	public static int getChargePrice(Card card, String enterStation, String enterTime, String exitStation, String exitTime, Subways subways)
@@ -71,7 +76,13 @@ public class PriceCalculator
     	}else
     	{
     		//计算基本票价
-    		price = getBasicPrice(enterStation,exitStation,subways);
+    		try{
+    			price = getBasicPrice(enterStation,exitStation,subways);
+    		}catch(SubwayException e)
+    		{
+    			throw new SubwayException(ReturnCodeEnum.E01,card);
+    		}
+    		
     		//按卡的类型计算折扣等
     		if(card.getCardType() == CardEnum.A)
         	{
@@ -81,8 +92,7 @@ public class PriceCalculator
         		price = (int)Math.floor(price*0.8);
         	}
     	}
-		
-		return 0;
+		return price;
 	}
 	
 	/**
@@ -103,18 +113,12 @@ public class PriceCalculator
     	}
 	}
 	
-	private static int dijkstra(String enterStation, String exitStation, Subways subways)
-	    	throws SubwayException
-	{	
-	    return 0;
-	}
-	
 	/**
 	 * 计算进出站时间差，并判断时间合法性抛出异常
 	 * @param enterTime
 	 * @param exitTime
 	 * @param card
-	 * @return
+	 * @return 进出站时间差（分钟）
 	 * @throws SubwayException
 	 */
 	private static int getTimePeriod(String enterTime, String exitTime, Card card)
@@ -153,4 +157,85 @@ public class PriceCalculator
     	}
     	return false;
     }
+    
+    /**
+     * dijkstra方法计算最短路径
+     * @param enterStation
+     * @param exitStation
+     * @param subways
+     * @return 最短路径值（米）
+     * @throws SubwayException
+     */
+    private static int dijkstra(String enterStation, String exitStation, Subways subways)
+	    	throws SubwayException
+	{	
+    	Table<String, String, Subways.DistanceInfo> table = subways.getStationDistances();
+    	//初始化
+    	Set<String> S = new HashSet<String>();
+    	S.add(enterStation);
+    	Set<String> U = new HashSet<String>();
+    	U.addAll(table.rowKeySet());
+    	U.remove(enterStation);
+    	Map<String, Integer> shortestPath = new HashMap<String, Integer>();
+    	int prePath = 0;
+    	String preStation = enterStation;
+    	
+    	while(!U.isEmpty())
+    	{
+    		int minPath = -1;
+    		String minStation = preStation;
+    		//更新剩下的顶点到enterStation的最短路径
+    		for(String curStation:U)
+    		{
+    			int cpath = -1;
+    			if(table.contains(preStation, curStation))
+    			{
+    				cpath = table.get(preStation, curStation).getDistance();
+    			}
+    			int ppath = -1;
+    			if(shortestPath.containsKey(curStation))
+    			{
+    				ppath = shortestPath.get(curStation);
+    			}
+    			//更新curStation到enterStation的最短路径
+    			if(ppath==-1 && cpath!=-1)
+    			{
+    				shortestPath.put(curStation, cpath+prePath);
+    			}else if(ppath!=-1 && cpath!=-1 && cpath+prePath<ppath)
+    			{
+    				shortestPath.remove(curStation);
+    				shortestPath.put(curStation, cpath+prePath);
+    			}
+    			//更新U中最短顶点，看curStation是否最短
+    			if(shortestPath.containsKey(curStation))
+    			{
+    				int p = shortestPath.get(curStation);
+    				if(p<minPath || minPath==-1)
+    				{
+    					minPath = p;
+    					minStation = curStation;
+    				}
+    			}
+    		}
+    		
+    		//已找到对应exitStation的最短路径，返回数据
+    		if(minStation.equals(exitStation))
+    		{
+    			System.out.println("path="+minPath);
+    			return minPath;
+    		}
+    		//U中没有与enterStation相连的路径了
+    		if(minPath == -1)
+    		{
+    			throw new SubwayException(ReturnCodeEnum.E01,new Card());
+    		}
+    		prePath = minPath;
+    		preStation = minStation;
+    		S.add(minStation);
+    		U.remove(minStation);
+    	}
+    	
+	    return -1;
+	}
+
 }
