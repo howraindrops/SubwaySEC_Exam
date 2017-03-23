@@ -25,10 +25,7 @@ import java.util.Map;
  * @version 1.0 OperationCenter V100R002C20, 2015/9/7]
  */
 public class CardManagerImpl implements CardManager
-{
-//	private Card[] cardArray = new Card[100];
-//	public List<ConsumeRecord>[] consumeRecords = new ArrayList[100];
-	
+{	
 	private Map<String, Card> cardMap = new HashMap<String, Card>();
 	public Map<String,List<ConsumeRecord>> consumeRecords = new HashMap<String,List<ConsumeRecord>>();
 	
@@ -126,7 +123,11 @@ public class CardManagerImpl implements CardManager
     private String getNextCardId() 
     	throws SubwayException
     {
-    	boolean findValidId = false;
+    	if(cardMap.size()>=100)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E08,new Card());
+    	}
+    	
     	String cardId = null;
     	for(int i=0; i<100; i++)
     	{
@@ -134,15 +135,10 @@ public class CardManagerImpl implements CardManager
     		if(!cardMap.containsKey(id))
     		{
     			cardId = id;
-    			findValidId = true;
     			break;
     		}
     	}
     	
-    	if(!findValidId)
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E08,new Card());
-    	}
     	return cardId;
     }
     

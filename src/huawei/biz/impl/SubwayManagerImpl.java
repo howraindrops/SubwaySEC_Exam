@@ -251,22 +251,6 @@ public class SubwayManagerImpl implements SubwayManager
     		return 0;
     	}
     	return 5;
-//    	int path = table.get(enterStation, exitStation).getDistance();
-//    	int price = 0;
-//    	if(path<=3000 && path>0)
-//    	{
-//    		price = 2;
-//    	}else if(path<=5000)
-//    	{
-//    		price = 3;
-//    	}else if(path<=10000)
-//    	{
-//    		price = 4;
-//    	}else
-//    	{
-//    		price = 5;
-//    	}
-//    	return price;
     }
     
     private boolean isDiscountValid(String enterTime)

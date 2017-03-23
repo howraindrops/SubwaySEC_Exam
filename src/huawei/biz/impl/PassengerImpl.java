@@ -13,7 +13,7 @@ import huawei.model.Subways;
 import huawei.model.Subways.DistanceInfo;
 
 import java.util.List;
-
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 /**
@@ -53,7 +53,7 @@ public class PassengerImpl implements Passenger
     	{
     		throw new SubwayException(ReturnCodeEnum.E07,new Card());
     	}
-    	
+    	//寻找最短路径并判断路径是否合法
     	int price = calculateBasicPrice(enterStation, exitStation, table);
     	
     	Card card = conductor.buyCard(enterStation, exitStation);
@@ -110,25 +110,7 @@ public class PassengerImpl implements Passenger
     	{
     		return 0;
     	}
-    	
     	return 5;
-    	
-//    	int path = table.get(enterStation, exitStation).getDistance();
-//    	int price = 0;
-//    	if(path<=3000 && path>0)
-//    	{
-//    		price = 2;
-//    	}else if(path<=5000)
-//    	{
-//    		price = 3;
-//    	}else if(path<=10000)
-//    	{
-//    		price = 4;
-//    	}else
-//    	{
-//    		price = 5;
-//    	}
-//    	return price;
     }
 
 }
