@@ -64,15 +64,26 @@ public class CardManagerImpl implements CardManager
     public Card recharge(String cardId, int money)
         throws SubwayException
     {
-    	Card card = getCardIdValid(cardId);
+    	Card card = queryCard(cardId);
     	card.setMoney(money+card.getMoney());
     	return card;
     }
 
     @Override
-    public Card queryCard(String cardId) throws SubwayException
+    public Card queryCard(String cardId) 
+    	throws SubwayException
     {
-    	Card card = getCardIdValid(cardId);
+    	Card card = new Card();
+    	if(cardMap.containsKey(cardId))
+    	{
+    		card = cardMap.get(cardId);
+    	}else
+    	{
+    		card = new Card();
+    		card.setCardId(cardId);
+    		card.setCardType(CardEnum.E);
+    		throw new SubwayException(ReturnCodeEnum.E06, card);
+    	}
     	return card;
     }
 
@@ -80,7 +91,7 @@ public class CardManagerImpl implements CardManager
     public Card deleteCard(String cardId)
         throws SubwayException
     {
-    	Card card = getCardIdValid(cardId);
+    	Card card = queryCard(cardId);
     	cardMap.remove(cardId);
     	if(consumeRecords.containsKey(cardId))
     	{
@@ -93,7 +104,7 @@ public class CardManagerImpl implements CardManager
     public Card consume(String cardId, int billing)
         throws SubwayException
     {
-    	Card card = getCardIdValid(cardId);
+    	Card card = queryCard(cardId);
     	
     	int money = card.getMoney();
     	if(billing>money)
@@ -101,7 +112,7 @@ public class CardManagerImpl implements CardManager
     		throw new SubwayException(ReturnCodeEnum.E02,card);
     	}
     	card.setMoney(money-billing);
-    	if(card.getMoney()<20)
+    	if(card.getMoney()<20 && card.getCardType()!=CardEnum.A)
     	{
     		throw new SubwayException(ReturnCodeEnum.E03,card);
     	}
@@ -112,7 +123,7 @@ public class CardManagerImpl implements CardManager
     public List<ConsumeRecord> queryConsumeRecord(String cardId)
         throws SubwayException
     {
-    	getCardIdValid(cardId);
+    	queryCard(cardId);
     	List<ConsumeRecord> crList;
     	if(consumeRecords.containsKey(cardId))
     	{
@@ -146,21 +157,4 @@ public class CardManagerImpl implements CardManager
     	
     	return cardId;
     }
-    
-    private Card getCardIdValid(String id)
-    	throws SubwayException
-	{
-    	Card card = new Card();
-    	if(cardMap.containsKey(id))
-    	{
-    		card = cardMap.get(id);
-    	}else
-    	{
-    		card = new Card();
-    		card.setCardId(id);
-    		card.setCardType(CardEnum.E);
-    		throw new SubwayException(ReturnCodeEnum.E06, card);
-    	}
-    	return card;
-	}
 }

@@ -11,8 +11,6 @@ import huawei.exam.SubwayException;
 import huawei.model.Card;
 import huawei.model.ConsumeRecord;
 import huawei.model.Subways;
-import huawei.model.Subways.DistanceInfo;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -62,12 +60,12 @@ public class SubwayManagerImpl implements SubwayManager
         throws SubwayException
     {
     	Card card = cardManager.queryCard(cardId);
-    	Table<String, String, DistanceInfo> table = subways.getStationDistances();
-    	boolean isStationValid = table.containsRow(enterStation)&&table.containsRow(exitStation);
-    	if(!isStationValid) 
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E07,null);
-    	}
+//    	Table<String, String, DistanceInfo> table = subways.getStationDistances();
+//    	boolean isStationValid = table.containsRow(enterStation)&&table.containsRow(exitStation);
+//    	if(!isStationValid) 
+//    	{
+//    		throw new SubwayException(ReturnCodeEnum.E07,null);
+//    	}
     	
     	//计算票价
     	int price;
@@ -262,12 +260,12 @@ public class SubwayManagerImpl implements SubwayManager
     public static int calculateBasicPrice(String enterStation, String exitStation, Subways subways)
         	throws SubwayException
     {
-    	//TODO Dijkstra算法求最短路径,路径非法时抛exception
     	if(enterStation.equals(exitStation))
     	{
     		return 0;
     	}
-    	
+
+    	//Dijkstra算法求最短路径并计算出价钱
     	int path = dijkstraMiniDistance_quick(subways, enterStation, exitStation);
     	int price = 0;
     	if(path<=3000 && path>0)
@@ -295,7 +293,9 @@ public class SubwayManagerImpl implements SubwayManager
      *
      * @author lj95801
      */
-    public static int dijkstraMiniDistance_quick(Subways subways,String enterStation, String exitStation)throws SubwayException{
+    public static int dijkstraMiniDistance_quick(Subways subways,String enterStation, String exitStation)
+    	throws SubwayException
+    {
         class Node {
            Node(String name, int dist){
                 this.name = name;
@@ -370,5 +370,12 @@ public class SubwayManagerImpl implements SubwayManager
         }
 
         return exitNode.dist;
+    }
+    
+    public static int dijkstra(Subways subways,String enterStation, String exitStation)
+    	throws SubwayException
+    {
+    	
+    	return 0;
     }
 }
