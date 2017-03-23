@@ -77,6 +77,7 @@ public class PriceCalculator
     	long time = getTimePeriod(enterTime,exitTime,card);
     	if(enterStation.equals(exitStation))
     	{
+    		//进出站相同时
     		price = time>30?3:0;
     	}else
     	{
@@ -103,6 +104,7 @@ public class PriceCalculator
     		case C: //普通卡
     			break;
     		case D: //学生卡
+    			//TODO 计算学生折扣
     			break;
     		default:
     			break;
@@ -258,7 +260,7 @@ public class PriceCalculator
 //    			System.out.println("path="+minPath);
     			return minPath;
     		}
-    		//U中没有与enterStation相连的路径了
+    		//U中没有与enterStation相连的路径了,且还没找到exitStation
     		if(minPath == -1)
     		{
     			throw new SubwayException(ReturnCodeEnum.E01,new Card());

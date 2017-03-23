@@ -60,6 +60,7 @@ public class CardManagerImpl implements CardManager
     public Card recharge(String cardId, int money)
         throws SubwayException
     {
+    	//TODO 充值优惠
     	Card card = queryCard(cardId);
     	card.setMoney(money+card.getMoney());
     	return card;
