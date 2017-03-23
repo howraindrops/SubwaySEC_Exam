@@ -74,6 +74,7 @@ public class SubwayManagerImpl implements SubwayManager
     		price = 3;
     	}else
     	{
+    		//计算基本票价
     		price = calculateBasicPrice(enterStation,exitStation,table);
     	}
     
