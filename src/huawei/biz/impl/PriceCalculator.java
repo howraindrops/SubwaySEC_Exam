@@ -1,5 +1,8 @@
 package huawei.biz.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,7 +10,6 @@ import java.util.Set;
 
 import com.google.common.collect.Table;
 
-import huawei.exam.CardEnum;
 import huawei.exam.ReturnCodeEnum;
 import huawei.exam.SubwayException;
 import huawei.model.Card;
@@ -16,6 +18,9 @@ import huawei.model.Subways.DistanceInfo;
 
 public class PriceCalculator
 {
+	private static final double ELDER_DISCOUNT = 0.8;
+	private static final String ELDER_DISCOUNT_TIME_FROM = "10:00";
+	private static final String ELDER_DISCOUNT_TIME_TO = "15:00";
 	/**
 	 * 计算基本票价
 	 * @param enterStation
@@ -69,7 +74,7 @@ public class PriceCalculator
 		checkStationValid(enterStation, exitStation, subways);
 		int price;
     	//计算时间差并判断时间是否合法
-    	int time = getTimePeriod(enterTime,exitTime,card);
+    	long time = getTimePeriod(enterTime,exitTime,card);
     	if(enterStation.equals(exitStation))
     	{
     		price = time>30?3:0;
@@ -84,13 +89,24 @@ public class PriceCalculator
     		}
     		
     		//按卡的类型计算折扣等
-    		if(card.getCardType() == CardEnum.A)
-        	{
-        		price = price>card.getMoney()?price:card.getMoney();
-        	}else if(card.getCardType() == CardEnum.B && isDiscountValid(enterTime))
-        	{
-        		price = (int)Math.floor(price*0.8);
-        	}
+    		switch(card.getCardType())
+    		{
+    		case A: //单程票
+    			price = price>card.getMoney()?price:card.getMoney();
+    			break;
+    		case B: //老年卡
+    			if(isDiscountValid(enterTime))
+    			{
+    				price = (int)Math.floor(price*ELDER_DISCOUNT);
+    			}
+    			break;
+    		case C: //普通卡
+    			break;
+    		case D: //学生卡
+    			break;
+    		default:
+    			break;
+    		}
     	}
 		return price;
 	}
@@ -121,23 +137,26 @@ public class PriceCalculator
 	 * @return 进出站时间差（分钟）
 	 * @throws SubwayException
 	 */
-	private static int getTimePeriod(String enterTime, String exitTime, Card card)
+	private static long getTimePeriod(String enterTime, String exitTime, Card card)
 		    	throws SubwayException
     {
-    	String[] enter = enterTime.split(":");
-    	String[] exit = exitTime.split(":");
-    	int enHour = Integer.valueOf(enter[0]);
-    	int enMin = Integer.valueOf(enter[1]);
-    	int exHour = Integer.valueOf(exit[0]);
-    	int exMin = Integer.valueOf(exit[0]);
-    	boolean isEnterLater = (enHour>exHour)||((enHour==exHour)&&(enMin>exMin));
-    	boolean isTimeFormatValid = enHour<24&&exHour<24&&enMin<60&&exMin<60;
-    	if(isEnterLater||(!isTimeFormatValid))
-    	{
-    		throw new SubwayException(ReturnCodeEnum.E05, card);
-    	}
-    	
-    	int time = (exHour*60 + exMin) - (enHour*60 + enMin);
+		SimpleDateFormat sdf = new SimpleDateFormat( "HH:mm" );
+		Date enTime, exTime;
+		try
+		{
+			enTime = sdf.parse(enterTime);
+			exTime = sdf.parse(exitTime);
+		} catch (ParseException e)
+		{
+			e.printStackTrace();
+			throw new SubwayException(ReturnCodeEnum.E05, card);
+		}
+		if(enTime.after(exTime))
+		{
+			throw new SubwayException(ReturnCodeEnum.E05, card);
+		}
+		
+    	long time = (exTime.getTime()-enTime.getTime())/1000*60;
     	return time;
     }
     
@@ -145,13 +164,24 @@ public class PriceCalculator
 	 * 判断是否符合老年卡折扣时间段
 	 * @param enterTime
 	 * @return
+	 * @throws SubwayException 
 	 */
-    private static boolean isDiscountValid(String enterTime)
+    private static boolean isDiscountValid(String enterTime) 
+    	throws SubwayException
     {
-    	String[] enter = enterTime.split(":");
-    	int enHour = Integer.valueOf(enter[0]);
-    	int enMin = Integer.valueOf(enter[1]);
-    	if((enHour>=10&&enHour<15)||(enHour==15&&enMin==0))
+    	SimpleDateFormat sdf =   new SimpleDateFormat( "HH:mm" );
+		Date enTime, fromTime, toTime;
+		try
+		{
+			enTime = sdf.parse(enterTime);
+			fromTime = sdf.parse(ELDER_DISCOUNT_TIME_FROM);
+			toTime = sdf.parse(ELDER_DISCOUNT_TIME_TO);
+		} catch (ParseException e)
+		{
+			e.printStackTrace();
+			throw new SubwayException(ReturnCodeEnum.E05, new Card());
+		}
+    	if(!enTime.after(toTime) && !enTime.before(fromTime))
     	{
     		return true;
     	}
@@ -170,6 +200,10 @@ public class PriceCalculator
 	    	throws SubwayException
 	{	
     	Table<String, String, Subways.DistanceInfo> table = subways.getStationDistances();
+    	if(table.contains(enterStation, exitStation))
+    	{
+    		return table.get(enterStation, exitStation).getDistance();
+    	}
     	//初始化
     	Set<String> S = new HashSet<String>();
     	S.add(enterStation);
@@ -221,7 +255,7 @@ public class PriceCalculator
     		//已找到对应exitStation的最短路径，返回数据
     		if(minStation.equals(exitStation))
     		{
-    			System.out.println("path="+minPath);
+//    			System.out.println("path="+minPath);
     			return minPath;
     		}
     		//U中没有与enterStation相连的路径了
