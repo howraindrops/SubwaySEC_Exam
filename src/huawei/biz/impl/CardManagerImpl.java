@@ -27,7 +27,8 @@ import java.util.Map;
 public class CardManagerImpl implements CardManager
 {	
 	private Map<String, Card> cardMap = new HashMap<String, Card>();
-	public Map<String,List<ConsumeRecord>> consumeRecords = new HashMap<String,List<ConsumeRecord>>();
+	private Map<String,List<ConsumeRecord>> consumeRecords = new HashMap<String,List<ConsumeRecord>>();
+	private final int MAX_CARD_NUMBER = 100;
 	
     @Override
     public Card buyCard(String enterStation, String exitStation)
@@ -81,6 +82,10 @@ public class CardManagerImpl implements CardManager
     {
     	Card card = getCardIdValid(cardId);
     	cardMap.remove(cardId);
+    	if(consumeRecords.containsKey(cardId))
+    	{
+    		consumeRecords.remove(cardId);
+    	}
 		return card;
     }
 
@@ -123,13 +128,13 @@ public class CardManagerImpl implements CardManager
     private String getNextCardId() 
     	throws SubwayException
     {
-    	if(cardMap.size()>=100)
+    	if(cardMap.size()>=MAX_CARD_NUMBER)
     	{
     		throw new SubwayException(ReturnCodeEnum.E08,new Card());
     	}
     	
     	String cardId = null;
-    	for(int i=0; i<100; i++)
+    	for(int i=0; i<MAX_CARD_NUMBER; i++)
     	{
     		String id = String.valueOf(i);
     		if(!cardMap.containsKey(id))
