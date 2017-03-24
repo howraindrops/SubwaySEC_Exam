@@ -143,7 +143,12 @@ public class CardManagerImpl implements CardManager
     public List<ConsumeRecord> queryConsumeRecord(String cardId)
         throws SubwayException
     {
-    	queryCard(cardId);
+    	Card card = queryCard(cardId);
+    	//单程卡不能查询消费记录
+    	if(card.getCardType() == CardEnum.A)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E00, card);
+    	}
     	List<ConsumeRecord> crList;
     	if(cardRecords.containsKey(cardId))
     	{
@@ -183,14 +188,9 @@ public class CardManagerImpl implements CardManager
     private void checkMoneyValid(int money)
     	throws SubwayException
     {
-    	if(money<0)
+    	if(money<0 || money>999)
     	{
-    		System.out.println("输入金额不能为负数");
     		throw new SubwayException(ReturnCodeEnum.E00,new Card());
-    	}else if(money>999)
-    	{
-    		System.out.println("输入金额或卡内余额不能超过999");
-    		throw new SubwayException(ReturnCodeEnum.E09,new Card());
     	}
     }
 }

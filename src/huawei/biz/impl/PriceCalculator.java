@@ -206,8 +206,6 @@ public class PriceCalculator
     		return table.get(enterStation, exitStation).getDistance();
     	}
     	//初始化
-    	Set<String> S = new HashSet<String>();
-    	S.add(enterStation);
     	Set<String> U = new HashSet<String>();
     	U.addAll(table.rowKeySet());
     	U.remove(enterStation);
@@ -256,7 +254,6 @@ public class PriceCalculator
     		//已找到对应exitStation的最短路径，返回数据
     		if(minStation.equals(exitStation))
     		{
-//    			System.out.println("path="+minPath);
     			return minPath;
     		}
     		//U中没有与enterStation相连的路径了,且还没找到exitStation
@@ -266,7 +263,6 @@ public class PriceCalculator
     		}
     		prePath = minPath;
     		preStation = minStation;
-    		S.add(minStation);
     		U.remove(minStation);
     	}
     	
