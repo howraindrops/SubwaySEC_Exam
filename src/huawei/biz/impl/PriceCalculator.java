@@ -206,8 +206,6 @@ public class PriceCalculator
     	Table<String, String, Subways.DistanceInfo> table = subways.getStationDistances();
     	if(shortestTable.contains(enterStation, exitStation))
     	{
-    		int p = shortestTable.get(enterStation, exitStation);
-    		System.out.println("table path="+p);
     		return shortestTable.get(enterStation, exitStation);
     	}
     	//初始化
@@ -272,7 +270,6 @@ public class PriceCalculator
     		{
     			shortestTable.put(enterStation, minStation, minPath);
     			shortestTable.put(minStation, enterStation, minPath);
-    			System.out.println("path="+minPath);
     			return minPath;
     		}
     		//U中没有与enterStation相连的路径了,且还没找到exitStation
