@@ -50,7 +50,14 @@ public class CardManagerImpl implements CardManager
     	checkMoneyValid(money);
     	Card card = new Card();
     	card.setCardType(cardEnum);
-    	card.setMoney(money);
+    	if(cardEnum == CardEnum.D)
+    	{
+    		int result = money+money/50*10;
+    		card.setMoney(result);
+    	}else
+    	{
+    		card.setMoney(money);
+    	}
     	String cardId = getNextCardId();
     	card.setCardId(cardId);
     	cardMap.put(cardId, card);
@@ -63,17 +70,17 @@ public class CardManagerImpl implements CardManager
     {
     	Card card = queryCard(cardId);
     	checkMoneyValid(money);
-    	int result = money+card.getMoney();
-    	//计算学生卡充值优惠
-    	if(card.getCardType() == CardEnum.D && money>50)
-    	{
-    		money -= 50;
-	    	while(money > 0)
-	    	{
-	    		result += 10;
-	    		money -= 50;
-	    	}
-    	}
+    	int result = money+card.getMoney()+(money-50)/50*10;
+//    	//计算学生卡充值优惠
+//    	if(card.getCardType() == CardEnum.D && money>50)
+//    	{
+//    		money -= 50;
+//	    	while(money > 0)
+//	    	{
+//	    		result += 10;
+//	    		money -= 50;
+//	    	}
+//    	}
     	checkMoneyValid(result);
     	card.setMoney(result);
     	return card;
