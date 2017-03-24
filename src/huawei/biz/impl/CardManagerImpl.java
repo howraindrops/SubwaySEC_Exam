@@ -50,7 +50,7 @@ public class CardManagerImpl implements CardManager
     	//不能用（B A XX）办理单程卡
     	if(cardEnum == CardEnum.A)
     	{
-    		throw new SubwayException(ReturnCodeEnum.E00,new Card());
+    		throw new SubwayException(ReturnCodeEnum.E04,new Card());
     	}
     	checkMoneyValid(money);
     	Card card = new Card();
