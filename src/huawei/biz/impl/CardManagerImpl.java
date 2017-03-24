@@ -69,18 +69,12 @@ public class CardManagerImpl implements CardManager
         throws SubwayException
     {
     	Card card = queryCard(cardId);
+    	if(card.getCardType() == CardEnum.A)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E00, card);
+    	}
     	checkMoneyValid(money);
-    	int result = money+card.getMoney()+(money-50)/50*10;
-//    	//计算学生卡充值优惠
-//    	if(card.getCardType() == CardEnum.D && money>50)
-//    	{
-//    		money -= 50;
-//	    	while(money > 0)
-//	    	{
-//	    		result += 10;
-//	    		money -= 50;
-//	    	}
-//    	}
+    	int result = money+card.getMoney()+money/50*10;
     	checkMoneyValid(result);
     	card.setMoney(result);
     	return card;
