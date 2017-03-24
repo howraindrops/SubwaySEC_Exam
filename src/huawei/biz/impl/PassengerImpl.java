@@ -20,7 +20,7 @@ import java.util.List;
  *
  * <p>Company: </p>
  *
- * @author
+ * @author 王雨芬
  * @version 1.0 OperationCenter V100R002C20, 2015/9/7]
  */
 public class PassengerImpl implements Passenger

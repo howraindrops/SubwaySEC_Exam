@@ -17,6 +17,9 @@ import huawei.model.Card;
 import huawei.model.Subways;
 import huawei.model.Subways.DistanceInfo;
 
+/**
+ * @author 王雨芬
+ */
 public class PriceCalculator
 {
 	private static final double ELDER_DISCOUNT = 0.8;
