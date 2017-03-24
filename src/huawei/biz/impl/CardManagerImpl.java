@@ -114,11 +114,6 @@ public class CardManagerImpl implements CardManager
     {
     	Card card = queryCard(cardId);
     	int money = card.getMoney();
-    	//销毁单程卡
-    	if(card.getCardType() == CardEnum.A)
-		{
-			deleteCard(cardId);
-		}
     	if(billing>money)
     	{
     		throw new SubwayException(ReturnCodeEnum.E02,card);
