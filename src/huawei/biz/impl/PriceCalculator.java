@@ -22,8 +22,8 @@ public class PriceCalculator
 	private static final double ELDER_DISCOUNT = 0.8;
 	private static final String ELDER_DISCOUNT_TIME_FROM = "10:00";
 	private static final String ELDER_DISCOUNT_TIME_TO = "15:00";
-	//TODO 保存找过的最短路径
-	Table<String, String, Subways.DistanceInfo> shortestTable = HashBasedTable.create();
+	//保存找过的最短路径
+	private static Table<String, String, Integer> shortestTable = HashBasedTable.create();
 	/**
 	 * 计算基本票价
 	 * @param enterStation
@@ -204,9 +204,11 @@ public class PriceCalculator
 	    	throws SubwayException
 	{	
     	Table<String, String, Subways.DistanceInfo> table = subways.getStationDistances();
-    	if(table.contains(enterStation, exitStation))
+    	if(shortestTable.contains(enterStation, exitStation))
     	{
-    		return table.get(enterStation, exitStation).getDistance();
+    		int p = shortestTable.get(enterStation, exitStation);
+    		System.out.println("table path="+p);
+    		return shortestTable.get(enterStation, exitStation);
     	}
     	//初始化
     	Set<String> U = new HashSet<String>();
@@ -223,6 +225,17 @@ public class PriceCalculator
     		//更新剩下的顶点到enterStation的最短路径
     		for(String curStation:U)
     		{
+    			if(shortestTable.contains(preStation, curStation))
+    			{
+    				int p = shortestTable.get(preStation, curStation);
+    				shortestPath.put(curStation, p+prePath);
+    				if(p+prePath<minPath || minPath==-1)
+    				{
+    					minPath = p+prePath;
+    					minStation = curStation;
+    				}
+    				continue;
+    			}
     			int cpath = -1;
     			if(table.contains(preStation, curStation))
     			{
@@ -257,6 +270,9 @@ public class PriceCalculator
     		//已找到对应exitStation的最短路径，返回数据
     		if(minStation.equals(exitStation))
     		{
+    			shortestTable.put(enterStation, minStation, minPath);
+    			shortestTable.put(minStation, enterStation, minPath);
+    			System.out.println("path="+minPath);
     			return minPath;
     		}
     		//U中没有与enterStation相连的路径了,且还没找到exitStation
@@ -267,6 +283,8 @@ public class PriceCalculator
     		prePath = minPath;
     		preStation = minStation;
     		U.remove(minStation);
+    		shortestTable.put(enterStation, minStation, minPath);
+    		shortestTable.put(minStation, enterStation, minPath);
     	}
     	
 	    return -1;
