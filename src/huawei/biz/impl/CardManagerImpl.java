@@ -47,6 +47,7 @@ public class CardManagerImpl implements CardManager
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
     {	
+    	checkMoneyValid(money);
     	Card card = new Card();
     	card.setCardType(cardEnum);
     	card.setMoney(money);
@@ -60,9 +61,21 @@ public class CardManagerImpl implements CardManager
     public Card recharge(String cardId, int money)
         throws SubwayException
     {
-    	//TODO 充值优惠
     	Card card = queryCard(cardId);
-    	card.setMoney(money+card.getMoney());
+    	checkMoneyValid(money);
+    	int result = money+card.getMoney();
+    	//计算学生卡充值优惠
+    	if(card.getCardType() == CardEnum.D && money>50)
+    	{
+    		money -= 50;
+	    	while(money > 0)
+	    	{
+	    		result += 10;
+	    		money -= 50;
+	    	}
+    	}
+    	checkMoneyValid(result);
+    	card.setMoney(result);
     	return card;
     }
 
@@ -150,5 +163,19 @@ public class CardManagerImpl implements CardManager
     		}
     	}
     	return null;
+    }
+   
+    private void checkMoneyValid(int money)
+    	throws SubwayException
+    {
+    	if(money<0)
+    	{
+    		System.out.println("输入金额不能为负数");
+    		throw new SubwayException(ReturnCodeEnum.E00,new Card());
+    	}else if(money>99)
+    	{
+    		System.out.println("输入金额或卡内余额不能超过999");
+    		throw new SubwayException(ReturnCodeEnum.E09,new Card());
+    	}
     }
 }
