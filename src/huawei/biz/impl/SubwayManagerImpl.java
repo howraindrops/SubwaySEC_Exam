@@ -62,11 +62,7 @@ public class SubwayManagerImpl implements SubwayManager
     
     	//执行扣费
     	cardManager.consume(cardId, price);
-    	if(card.getCardType() == CardEnum.A)
-    	{
-    		//回收单程卡
-    		cardManager.deleteCard(cardId);
-    	}else
+    	if(card.getCardType() != CardEnum.A)
     	{
     		//保存消费记录
     		ConsumeRecord cr = new ConsumeRecord();
