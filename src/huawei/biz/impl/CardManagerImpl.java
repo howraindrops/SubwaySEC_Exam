@@ -47,6 +47,11 @@ public class CardManagerImpl implements CardManager
     public Card buyCard(CardEnum cardEnum, int money)
         throws SubwayException
     {	
+    	//不能用（B A XX）办理单程卡
+    	if(cardEnum == CardEnum.A)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E00,new Card());
+    	}
     	checkMoneyValid(money);
     	Card card = new Card();
     	card.setCardType(cardEnum);
@@ -62,6 +67,11 @@ public class CardManagerImpl implements CardManager
         throws SubwayException
     {
     	Card card = queryCard(cardId);
+    	//单程卡不能充值
+    	if(card.getCardType() == CardEnum.A)
+    	{
+    		throw new SubwayException(ReturnCodeEnum.E00,new Card());
+    	}
     	checkMoneyValid(money);
     	int result = money+card.getMoney();
     	//计算学生卡充值优惠
@@ -114,6 +124,11 @@ public class CardManagerImpl implements CardManager
     {
     	Card card = queryCard(cardId);
     	int money = card.getMoney();
+    	//销毁单程卡
+    	if(card.getCardType() == CardEnum.A)
+		{
+			deleteCard(cardId);
+		}
     	if(billing>money)
     	{
     		throw new SubwayException(ReturnCodeEnum.E02,card);

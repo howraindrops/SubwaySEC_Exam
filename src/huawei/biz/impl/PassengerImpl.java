@@ -45,7 +45,7 @@ public class PassengerImpl implements Passenger
     	int price = PriceCalculator.getBasicPrice(enterStation, exitStation, subways);
     	//出入车站是合法的，开始办单程票
     	Card card = conductor.buyCard(enterStation, exitStation);
-    	card = recharge(card.getCardId(), price);
+    	card.setMoney(price);
         return card;
     }
     
