@@ -71,7 +71,7 @@ public class CardManagerImpl implements CardManager
     	Card card = queryCard(cardId);
     	if(card.getCardType() == CardEnum.A)
     	{
-    		throw new SubwayException(ReturnCodeEnum.E00, card);
+    		throw new SubwayException(ReturnCodeEnum.E09, card);
     	}
     	checkMoneyValid(money);
     	int result = money+card.getMoney()+money/50*10;
@@ -133,7 +133,7 @@ public class CardManagerImpl implements CardManager
     	//单程卡不能查询消费记录
     	if(card.getCardType() == CardEnum.A)
     	{
-    		throw new SubwayException(ReturnCodeEnum.E00, card);
+    		throw new SubwayException(ReturnCodeEnum.E09, card);
     	}
     	List<ConsumeRecord> crList;
     	if(cardRecords.containsKey(cardId))
@@ -176,7 +176,7 @@ public class CardManagerImpl implements CardManager
     {
     	if(money<0 || money>999)
     	{
-    		throw new SubwayException(ReturnCodeEnum.E00,new Card());
+    		throw new SubwayException(ReturnCodeEnum.E09,new Card());
     	}
     }
 }
