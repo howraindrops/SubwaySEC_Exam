@@ -104,7 +104,6 @@ public class PriceCalculator
     		case C: //普通卡
     			break;
     		case D: //学生卡
-    			//TODO 计算学生折扣
     			break;
     		default:
     			break;

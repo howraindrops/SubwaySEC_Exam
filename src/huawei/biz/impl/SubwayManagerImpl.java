@@ -76,6 +76,11 @@ public class SubwayManagerImpl implements SubwayManager
 	    	cr.setExitTime(exitTime);
 	    	cr.setConsumeMoney(price);
 	    	List<ConsumeRecord> crList = cardManager.queryConsumeRecord(cardId);
+	    	//最多记录20条消费记录
+	    	if(crList.size() == 20)
+	    	{
+	    		crList.remove(0);
+	    	}
 	    	crList.add(cr);
 	    	if(card.getMoney()<20)
 	    	{

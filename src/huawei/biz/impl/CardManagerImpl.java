@@ -172,7 +172,7 @@ public class CardManagerImpl implements CardManager
     	{
     		System.out.println("输入金额不能为负数");
     		throw new SubwayException(ReturnCodeEnum.E00,new Card());
-    	}else if(money>99)
+    	}else if(money>999)
     	{
     		System.out.println("输入金额或卡内余额不能超过999");
     		throw new SubwayException(ReturnCodeEnum.E09,new Card());
