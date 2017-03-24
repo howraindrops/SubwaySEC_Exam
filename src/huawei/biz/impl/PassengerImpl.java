@@ -43,7 +43,6 @@ public class PassengerImpl implements Passenger
     	Subways subways = subwayManager.querySubways();
     	//计算按两个站点之间最短距离计算基本票价，若没有路线会抛异常
     	int price = PriceCalculator.getBasicPrice(enterStation, exitStation, subways);
-    	//出入车站是合法的，开始办单程票
     	Card card = conductor.buyCard(enterStation, exitStation);
     	card.setMoney(price);
         return card;
