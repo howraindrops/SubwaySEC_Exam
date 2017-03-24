@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import huawei.exam.ReturnCodeEnum;
@@ -21,6 +22,8 @@ public class PriceCalculator
 	private static final double ELDER_DISCOUNT = 0.8;
 	private static final String ELDER_DISCOUNT_TIME_FROM = "10:00";
 	private static final String ELDER_DISCOUNT_TIME_TO = "15:00";
+	//TODO 保存找过的最短路径
+	Table<String, String, Subways.DistanceInfo> shortestTable = HashBasedTable.create();
 	/**
 	 * 计算基本票价
 	 * @param enterStation
